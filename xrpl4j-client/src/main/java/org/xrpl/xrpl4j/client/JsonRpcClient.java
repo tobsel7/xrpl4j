@@ -88,6 +88,7 @@ public interface JsonRpcClient {
 
     return Feign.builder()
       .encoder(new JacksonEncoder(OBJECT_MAPPER))
+      .decode404()
       .errorDecoder(new RetryStatusDecoder(RETRY_INTERVAL, RETRY_HTTP_STATUSES))
       .decoder(new OptionalDecoder(new JacksonDecoder(OBJECT_MAPPER)))
       .target(JsonRpcClient.class, rippledUrl.toString());

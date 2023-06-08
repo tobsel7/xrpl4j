@@ -69,6 +69,7 @@ public interface FaucetClient {
     final ObjectMapper objectMapper = ObjectMapperFactory.create();
     return Feign.builder()
       .encoder(new JacksonEncoder(objectMapper))
+      .decode404()
       .errorDecoder(new RetryStatusDecoder(RETRY_INTERVAL, RETRY_HTTP_STATUSES))
       .decoder(new OptionalDecoder(new JacksonDecoder(objectMapper)))
       .target(FaucetClient.class, faucetUrl.toString());

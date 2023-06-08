@@ -44,7 +44,7 @@ public class RetryStatusDecoder implements ErrorDecoder {
    * Constructs the custom http response status decoder.
    *
    * @param retryInterval        the duration after which a retry will be initiated.
-   * @param retryHttpStatusCodes http status codes that can be retried
+   * @param retryHttpStatusCodes http status codes that can be retried.
    */
   public RetryStatusDecoder(Duration retryInterval, Integer... retryHttpStatusCodes) {
     this.retryStatuses = ImmutableList.<Integer>builder()
