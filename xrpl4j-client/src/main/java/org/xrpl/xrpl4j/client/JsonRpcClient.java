@@ -51,15 +51,30 @@ import java.util.Optional;
 @Beta
 public interface JsonRpcClient {
 
+  /** The default logger for client. */
   Logger logger = LoggerFactory.getLogger(JsonRpcClient.class);
 
+  /** The Accept header name used in RPC requests. */
   String HEADER_ACCEPT = "Accept";
+  /** The Content-Type header name used in RPC requests. */
   String HEADER_CONTENT_TYPE = "Content-Type";
+  /** The Accept and Content-Type header value used in RPC requests. */
   String APPLICATION_JSON = "application/json";
 
-  ObjectMapper objectMapper = ObjectMapperFactory.create();
-  int SERVICE_UNAVAILABLE_STATUS = 503;
+  /**
+   * An array of http statuses that can be retried.
+   * 503 - Rate limiting will return a service unavailable and can be retried.
+   */
+  Integer[] RETRY_HTTP_STATUSES = {
+    503 // Service unavailable.
+  };
+  /** The retry interval after which a failed request should be repeated. */
   Duration RETRY_INTERVAL = Duration.ofSeconds(1);
+
+  /**
+   * A default object mapper for JSON serialization.
+   */
+  ObjectMapper OBJECT_MAPPER = ObjectMapperFactory.create();
 
   /**
    * Constructs a new client for the given url.
@@ -72,11 +87,9 @@ public interface JsonRpcClient {
     Objects.requireNonNull(rippledUrl);
 
     return Feign.builder()
-      .encoder(new JacksonEncoder(objectMapper))
-      // rate limiting will return a 503 status that can be retried
-      .errorDecoder(new RetryStatusDecoder(RETRY_INTERVAL, SERVICE_UNAVAILABLE_STATUS))
-      .decode404()
-      .decoder(new OptionalDecoder(new JacksonDecoder(objectMapper)))
+      .encoder(new JacksonEncoder(OBJECT_MAPPER))
+      .errorDecoder(new RetryStatusDecoder(RETRY_INTERVAL, RETRY_HTTP_STATUSES))
+      .decoder(new OptionalDecoder(new JacksonDecoder(OBJECT_MAPPER)))
       .target(JsonRpcClient.class, rippledUrl.toString());
   }
 
@@ -110,7 +123,7 @@ public interface JsonRpcClient {
     JsonRpcRequest request,
     Class<T> resultType
   ) throws JsonRpcClientErrorException {
-    JavaType javaType = objectMapper.constructType(resultType);
+    JavaType javaType = OBJECT_MAPPER.constructType(resultType);
     return send(request, javaType);
   }
 
@@ -137,7 +150,7 @@ public interface JsonRpcClient {
     JsonNode result = response.get("result");
     checkForError(response);
     try {
-      return objectMapper.readValue(result.toString(), resultType);
+      return OBJECT_MAPPER.readValue(result.toString(), resultType);
     } catch (JsonProcessingException e) {
       throw new JsonRpcClientErrorException(e);
     }

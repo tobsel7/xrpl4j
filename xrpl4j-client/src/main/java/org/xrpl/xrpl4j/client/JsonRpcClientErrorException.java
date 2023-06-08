@@ -25,11 +25,12 @@ package org.xrpl.xrpl4j.client;
  */
 public class JsonRpcClientErrorException extends Exception {
 
-  public JsonRpcClientErrorException(String error) {
+  JsonRpcClientErrorException(String error) {
     super(error);
   }
 
-  public JsonRpcClientErrorException(Throwable cause) {
+  JsonRpcClientErrorException(Throwable cause) {
     super(cause);
   }
+
 }

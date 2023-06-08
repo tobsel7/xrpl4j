@@ -39,10 +39,21 @@ import java.util.Objects;
  */
 public interface FaucetClient {
 
+  /** The Accept header name used in RPC requests. */
   String HEADER_ACCEPT = "Accept";
+  /** The Content-Type header name used in RPC requests. */
   String HEADER_CONTENT_TYPE = "Content-Type";
+  /** The Accept and Content-Type header value used in RPC requests. */
   String APPLICATION_JSON = "application/json";
-  int SERVICE_UNAVAILABLE_STATUS = 503;
+
+  /**
+   * An array of http statuses that can be retried.
+   * 503 - Rate limiting will return a service unavailable and can be retried.
+   */
+  Integer[] RETRY_HTTP_STATUSES = {
+    503 // Service unavailable.
+  };
+  /** The retry interval after which a failed request should be repeated. */
   Duration RETRY_INTERVAL = Duration.ofSeconds(1);
 
   /**
@@ -58,9 +69,7 @@ public interface FaucetClient {
     final ObjectMapper objectMapper = ObjectMapperFactory.create();
     return Feign.builder()
       .encoder(new JacksonEncoder(objectMapper))
-      .decode404()
-      // rate limiting will return a 503 status that can be retried
-      .errorDecoder(new RetryStatusDecoder(RETRY_INTERVAL, SERVICE_UNAVAILABLE_STATUS))
+      .errorDecoder(new RetryStatusDecoder(RETRY_INTERVAL, RETRY_HTTP_STATUSES))
       .decoder(new OptionalDecoder(new JacksonDecoder(objectMapper)))
       .target(FaucetClient.class, faucetUrl.toString());
   }

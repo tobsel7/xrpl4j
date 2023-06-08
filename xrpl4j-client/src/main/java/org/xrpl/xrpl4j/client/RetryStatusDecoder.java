@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableList;
 import feign.Response;
 import feign.RetryableException;
 import feign.codec.ErrorDecoder;
+import org.xrpl.xrpl4j.client.JsonRpcClient;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -38,28 +38,28 @@ public class RetryStatusDecoder implements ErrorDecoder {
   private final ErrorDecoder defaultErrorDecoder = new Default();
 
   private final Duration retryInterval;
-  private final List<Integer> retryableStatuses;
+  private final List<Integer> retryStatuses;
 
   /**
-   * Required-args constructor.
+   * Constructs the custom http response status decoder.
    *
-   * @param retryInterval       retry frequency.
-   * @param retryHttpStatusCode http status code to retry
-   * @param otherStatuses       additional http status codes to retry.
+   * @param retryInterval        the duration after which a retry will be initiated.
+   * @param retryHttpStatusCodes http status codes that can be retried
    */
-  public RetryStatusDecoder(Duration retryInterval, Integer retryHttpStatusCode, Integer... otherStatuses) {
-    this.retryableStatuses = ImmutableList.<Integer>builder().add(retryHttpStatusCode)
-      .addAll(Arrays.asList(otherStatuses))
-      .build();
+  public RetryStatusDecoder(Duration retryInterval, Integer... retryHttpStatusCodes) {
+    this.retryStatuses = ImmutableList.<Integer>builder()
+            .add(retryHttpStatusCodes)
+            .build();
     this.retryInterval = retryInterval;
   }
 
   @Override
   public Exception decode(String methodKey, Response response) {
     Exception exception = defaultErrorDecoder.decode(methodKey, response);
-    if (retryableStatuses.contains(response.status())) {
-      JsonRpcClient.logger.error(String.format("##### Got %s response from %s #######", response.status(),
-        methodKey));
+    if (retryStatuses.contains(response.status())) {
+      JsonRpcClient.logger.error(
+              String.format("##### Got %s response from %s #######", response.status(), methodKey)
+      );
       return new RetryableException(
         response.status(),
         exception.getMessage(),

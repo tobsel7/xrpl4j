@@ -1,6 +1,6 @@
 package org.xrpl.xrpl4j.tests;
 
-/*-
+/*
  * ========================LICENSE_START=================================
  * xrpl4j :: integration-tests
  * %%
@@ -42,9 +42,8 @@ import org.xrpl.xrpl4j.model.client.ledger.LedgerRequestParams;
 import org.xrpl.xrpl4j.model.client.ledger.LedgerResult;
 import org.xrpl.xrpl4j.model.transactions.Address;
 import org.xrpl.xrpl4j.model.transactions.Hash256;
+import org.xrpl.xrpl4j.model.transactions.Marker;
 import org.xrpl.xrpl4j.tests.environment.MainnetEnvironment;
-
-import java.util.Optional;
 
 /**
  * An Integration Test to validate submission of Account transactions.
@@ -97,7 +96,7 @@ public class AccountTransactionsIT {
       pages++;
       logger.info("Retrieved {} ledgers (marker={} page={})",
         transactionsFound,
-        results.marker().map($ -> $.value()).orElseGet(() -> "n/a"),
+        results.marker().map(Marker::value).orElse("n/a"),
         pages
       );
     }

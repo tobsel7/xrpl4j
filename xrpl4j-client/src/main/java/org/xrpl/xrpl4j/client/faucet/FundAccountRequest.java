@@ -33,6 +33,10 @@ import org.xrpl.xrpl4j.model.transactions.Address;
 @JsonDeserialize(as = ImmutableFundAccountRequest.class)
 public interface FundAccountRequest {
 
+  /**
+   * Construct an {@link ImmutableFundAccountRequest.Builder}.
+   * @return An {@link ImmutableFundAccountRequest.Builder}.
+   */
   static ImmutableFundAccountRequest.Builder builder() {
     return ImmutableFundAccountRequest.builder();
   }

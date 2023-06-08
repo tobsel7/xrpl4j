@@ -35,6 +35,10 @@ import java.util.List;
 @JsonDeserialize(as = ImmutableJsonRpcRequest.class)
 public interface JsonRpcRequest {
 
+  /**
+   * Construct an {@link ImmutableJsonRpcRequest.Builder}.
+   * @return An {@link ImmutableJsonRpcRequest.Builder}.
+   */
   static ImmutableJsonRpcRequest.Builder builder() {
     return ImmutableJsonRpcRequest.builder();
   }
